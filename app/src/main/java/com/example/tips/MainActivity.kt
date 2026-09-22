@@ -35,12 +35,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Slider
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Button
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.mutableFloatStateOf
 
 val InputFieldColor = Color(0xFFF6C6D9)
 
@@ -51,8 +51,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             TipsTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    TipCalculator(innerPadding = Modifier.padding(innerPadding))
-
+                    TipCalculator(modifier = Modifier.padding(innerPadding))
                 }
             }
         }
@@ -92,17 +91,14 @@ fun calculateTotal(orderAmount: Double, tip: Double, discountAmount: Double): Do
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TipCalculator(innerPadding: Modifier) {
+fun TipCalculator(modifier: Modifier = Modifier) {
     var orderAmountText by remember { mutableStateOf("") }
     var dishCountText by remember { mutableStateOf("") }
-    var tipPercent by remember { mutableStateOf(0f) }
-    var showTotalInsteadOfDiscount by remember { mutableStateOf(false) }
+    var tipPercent by remember { mutableFloatStateOf(0f) }
 
-    // ===== Snackbar + Coroutine =====
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
-    // ===== Вычисляемые переменные =====
     var orderAmount = orderAmountText.toDoubleOrNull()
     if (orderAmount == null) {
         orderAmount = 0.0
@@ -125,7 +121,7 @@ fun TipCalculator(innerPadding: Modifier) {
         unfocusedIndicatorColor = Color.Transparent
     )
 
-    Column(modifier = innerPadding.fillMaxSize().padding(16.dp)) {
+    Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(text = "Сумма заказа:")
@@ -173,7 +169,7 @@ fun TipCalculator(innerPadding: Modifier) {
                 tipPercent = newValue
                 val currentTip = calculateTip(orderAmount, newValue.toInt())
                 coroutineScope.launch {
-                    snackbarHostState.showSnackbar(message = "Чаевые: ${currentTip}")
+                    snackbarHostState.showSnackbar(message = "Чаевые: $currentTip")
                 }
             },
             valueRange = 0f..25f,
@@ -219,30 +215,23 @@ fun TipCalculator(innerPadding: Modifier) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        if (showTotalInsteadOfDiscount) {
-            Text(text = "Итого:")
-            TextField(
-                value = totalAmount.toString(),
-                onValueChange = { },
-                readOnly = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-        } else {
-            Text(text = "Сумма скидки:")
-            TextField(
-                value = discountAmount.toString(),
-                onValueChange = { },
-                readOnly = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-
-        Button(
-            onClick = { showTotalInsteadOfDiscount = true },
+        Text(text = "Сумма скидки:")
+        TextField(
+            value = discountAmount.toString(),
+            onValueChange = { },
+            readOnly = true,
             modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = "Итого")
-        }
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(text = "Итого:")
+        TextField(
+            value = totalAmount.toString(),
+            onValueChange = { },
+            readOnly = true,
+            modifier = Modifier.fillMaxWidth()
+        )
 
         SnackbarHost(hostState = snackbarHostState) { data ->
             Snackbar {
@@ -256,6 +245,6 @@ fun TipCalculator(innerPadding: Modifier) {
 @Composable
 fun TipCalculatorScreenPreview() {
     TipsTheme {
-        TipCalculator(innerPadding = Modifier)
+        TipCalculator(modifier = Modifier)
     }
 }
