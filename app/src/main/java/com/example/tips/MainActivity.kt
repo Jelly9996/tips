@@ -12,6 +12,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.tips.ui.theme.TipsTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+val InputFieldColor = Color(0xFFF6C6D9)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,8 +41,49 @@ class MainActivity : ComponentActivity() {
         setContent {
             TipsTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    TipCalculator(innerPadding = Modifier.padding(innerPadding))
+
                 }
             }
         }
+    }
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TipCalculator(innerPadding: Modifier) {
+    var orderAmountText by remember { mutableStateOf("") }
+
+    val pinkFieldColors = TextFieldDefaults.colors(
+        focusedContainerColor = InputFieldColor,
+        unfocusedContainerColor = InputFieldColor,
+        focusedIndicatorColor = Color.Transparent,
+        unfocusedIndicatorColor = Color.Transparent
+    )
+
+    Column(modifier = innerPadding.fillMaxSize().padding(16.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = "Сумма заказа:")
+            Spacer(modifier = Modifier.width(8.dp))
+            TextField(
+                value = orderAmountText,
+                onValueChange = { orderAmountText = it },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true,
+                colors = pinkFieldColors,
+                shape = RoundedCornerShape(6.dp),
+                textStyle = androidx.compose.ui.text.TextStyle(fontSize = 16.sp),
+                modifier = Modifier
+                    .width(140.dp)
+                    .height(52.dp)
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TipCalculatorScreenPreview() {
+    TipsTheme {
+        TipCalculator(innerPadding = Modifier)
     }
 }
