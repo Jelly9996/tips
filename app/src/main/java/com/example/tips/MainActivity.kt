@@ -35,6 +35,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Slider
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 
 val InputFieldColor = Color(0xFFF6C6D9)
 
@@ -50,8 +56,40 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
     }
+
 }
+
+fun calculateTip(orderAmount: Double, tipPercent: Int): Double {
+    val tip = orderAmount * tipPercent / 100.0
+    return tip
+}
+
+fun calculateDiscountPercent(dishCount: Int): Int {
+    var discountPercent = 0
+    if (dishCount in 1..2) {
+        discountPercent = 3
+    } else if (dishCount in 3..5) {
+        discountPercent = 5
+    } else if (dishCount in 6..10) {
+        discountPercent = 7
+    } else if (dishCount > 10) {
+        discountPercent = 10
+    }
+    return discountPercent
+}
+
+fun calculateDiscountAmount(orderAmount: Double, discountPercent: Int): Double {
+    val discountAmount = orderAmount * discountPercent / 100.0
+    return discountAmount
+}
+
+fun calculateTotal(orderAmount: Double, tip: Double, discountAmount: Double): Double {
+    val total = orderAmount + tip - discountAmount
+    return total
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TipCalculator(innerPadding: Modifier) {
@@ -59,6 +97,26 @@ fun TipCalculator(innerPadding: Modifier) {
     var dishCountText by remember { mutableStateOf("") }
     var tipPercent by remember { mutableStateOf(0f) }
     var showTotalInsteadOfDiscount by remember { mutableStateOf(false) }
+
+    // ===== Snackbar + Coroutine =====
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+
+    // ===== Вычисляемые переменные =====
+    var orderAmount = orderAmountText.toDoubleOrNull()
+    if (orderAmount == null) {
+        orderAmount = 0.0
+    }
+
+    var dishCount = dishCountText.toIntOrNull()
+    if (dishCount == null) {
+        dishCount = 0
+    }
+
+    val discountPercent = calculateDiscountPercent(dishCount)
+    val discountAmount = calculateDiscountAmount(orderAmount, discountPercent)
+    val tipAmount = calculateTip(orderAmount, tipPercent.toInt())
+    val totalAmount = calculateTotal(orderAmount, tipAmount, discountAmount)
 
     val pinkFieldColors = TextFieldDefaults.colors(
         focusedContainerColor = InputFieldColor,
@@ -68,6 +126,7 @@ fun TipCalculator(innerPadding: Modifier) {
     )
 
     Column(modifier = innerPadding.fillMaxSize().padding(16.dp)) {
+
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(text = "Сумма заказа:")
             Spacer(modifier = Modifier.width(8.dp))
@@ -84,7 +143,6 @@ fun TipCalculator(innerPadding: Modifier) {
                     .height(52.dp)
             )
         }
-
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -104,13 +162,20 @@ fun TipCalculator(innerPadding: Modifier) {
                     .height(52.dp)
             )
         }
+
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(text = "Чаевые:")
 
         Slider(
             value = tipPercent,
-            onValueChange = { newValue -> tipPercent = newValue },
+            onValueChange = { newValue ->
+                tipPercent = newValue
+                val currentTip = calculateTip(orderAmount, newValue.toInt())
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar(message = "Чаевые: ${currentTip}")
+                }
+            },
             valueRange = 0f..25f,
             steps = 4
         )
@@ -122,6 +187,7 @@ fun TipCalculator(innerPadding: Modifier) {
             Text(text = "0")
             Text(text = "25")
         }
+
         Spacer(modifier = Modifier.height(24.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -133,21 +199,54 @@ fun TipCalculator(innerPadding: Modifier) {
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    RadioButton(selected = false, onClick = { })
+                    RadioButton(selected = discountPercent == 3, onClick = { })
                     Text(text = "3%")
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    RadioButton(selected = false, onClick = { })
+                    RadioButton(selected = discountPercent == 5, onClick = { })
                     Text(text = "5%")
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    RadioButton(selected = false, onClick = { })
+                    RadioButton(selected = discountPercent == 7, onClick = { })
                     Text(text = "7%")
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    RadioButton(selected = false, onClick = { })
+                    RadioButton(selected = discountPercent == 10, onClick = { })
                     Text(text = "10%")
                 }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        if (showTotalInsteadOfDiscount) {
+            Text(text = "Итого:")
+            TextField(
+                value = totalAmount.toString(),
+                onValueChange = { },
+                readOnly = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+        } else {
+            Text(text = "Сумма скидки:")
+            TextField(
+                value = discountAmount.toString(),
+                onValueChange = { },
+                readOnly = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        Button(
+            onClick = { showTotalInsteadOfDiscount = true },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = "Итого")
+        }
+
+        SnackbarHost(hostState = snackbarHostState) { data ->
+            Snackbar {
+                Text(data.visuals.message)
             }
         }
     }
