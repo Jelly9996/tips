@@ -31,6 +31,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.Slider
 
 val InputFieldColor = Color(0xFFF6C6D9)
 
@@ -53,6 +56,7 @@ class MainActivity : ComponentActivity() {
 fun TipCalculator(innerPadding: Modifier) {
     var orderAmountText by remember { mutableStateOf("") }
     var dishCountText by remember { mutableStateOf("") }
+    var tipPercent by remember { mutableStateOf(0f) }
 
     val pinkFieldColors = TextFieldDefaults.colors(
         focusedContainerColor = InputFieldColor,
@@ -97,6 +101,24 @@ fun TipCalculator(innerPadding: Modifier) {
                     .width(80.dp)
                     .height(52.dp)
             )
+        }
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(text = "Чаевые:")
+
+        Slider(
+            value = tipPercent,
+            onValueChange = { newValue -> tipPercent = newValue },
+            valueRange = 0f..25f,
+            steps = 4
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(text = "0")
+            Text(text = "25")
         }
     }
 }
