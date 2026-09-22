@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Slider
+import androidx.compose.material3.RadioButton
 
 val InputFieldColor = Color(0xFFF6C6D9)
 
@@ -57,6 +58,7 @@ fun TipCalculator(innerPadding: Modifier) {
     var orderAmountText by remember { mutableStateOf("") }
     var dishCountText by remember { mutableStateOf("") }
     var tipPercent by remember { mutableStateOf(0f) }
+    var showTotalInsteadOfDiscount by remember { mutableStateOf(false) }
 
     val pinkFieldColors = TextFieldDefaults.colors(
         focusedContainerColor = InputFieldColor,
@@ -119,6 +121,34 @@ fun TipCalculator(innerPadding: Modifier) {
         ) {
             Text(text = "0")
             Text(text = "25")
+        }
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = "Скидка:")
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Row(
+                modifier = Modifier.weight(1f),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    RadioButton(selected = false, onClick = { })
+                    Text(text = "3%")
+                }
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    RadioButton(selected = false, onClick = { })
+                    Text(text = "5%")
+                }
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    RadioButton(selected = false, onClick = { })
+                    Text(text = "7%")
+                }
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    RadioButton(selected = false, onClick = { })
+                    Text(text = "10%")
+                }
+            }
         }
     }
 }
