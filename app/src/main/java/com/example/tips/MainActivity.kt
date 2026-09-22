@@ -52,6 +52,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun TipCalculator(innerPadding: Modifier) {
     var orderAmountText by remember { mutableStateOf("") }
+    var dishCountText by remember { mutableStateOf("") }
 
     val pinkFieldColors = TextFieldDefaults.colors(
         focusedContainerColor = InputFieldColor,
@@ -74,6 +75,26 @@ fun TipCalculator(innerPadding: Modifier) {
                 textStyle = androidx.compose.ui.text.TextStyle(fontSize = 16.sp),
                 modifier = Modifier
                     .width(140.dp)
+                    .height(52.dp)
+            )
+        }
+
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = "Количество блюд:")
+            Spacer(modifier = Modifier.width(8.dp))
+            TextField(
+                value = dishCountText,
+                onValueChange = { dishCountText = it },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true,
+                colors = pinkFieldColors,
+                shape = RoundedCornerShape(6.dp),
+                textStyle = androidx.compose.ui.text.TextStyle(fontSize = 16.sp),
+                modifier = Modifier
+                    .width(80.dp)
                     .height(52.dp)
             )
         }
